@@ -7,15 +7,15 @@
 
 I = im2double(imread('test.jpg'));
 sites = I(:);
+
 %% 1. Data term only
-labels = initMRF(sites);
-MAP_labels1 = do_greedyMAP(labels);
+[initLabels, U] = mapUnary(sites);
 
 %% 2. with Pairwise term and ICM
-MAP_labels2 = icm(labels);
+icmLabels = icm(initLabels, sites);
 
 %% 3. with Simulated Annealing
-MAP_labels3 = sim_annealing(labels)
+saLabels = sim_annealing(initlabels, sites);
 
 %% 4. CRF
- 
+crfLabels = CRF(initlabels, sites); 
