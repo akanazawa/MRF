@@ -5,6 +5,7 @@ function [U] = pairwise(site, labels, K, CRF)
 % B_ij = K if l_i ~= l_j
 %        0 else
 %
+% For CRF, send a struct as option
 % If crf is set, 4*K*(M - d/dx(i,j))./M, where M is
 % the max derivative in each direction.
 % 
@@ -13,7 +14,7 @@ function [U] = pairwise(site, labels, K, CRF)
     Nx = site.xNeighbors; 
     Ny = site.yNeighbors;
     if ~isstruct(CRF)
-        U = K*numel(find(labels([Nx, Ny]) ~= labels(site.ind)));
+        U = K*numel(find(labels([Nx ; Ny]) ~= labels(site.ind)));
     else
         indx = find(labels(Nx) ~= labels(site.ind));
         indy = find(labels(Ny) ~= labels(site.ind));

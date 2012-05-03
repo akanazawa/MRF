@@ -1,1 +1,0 @@
-function [labels] = sim_annealing(sites, initLabels)
