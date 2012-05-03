@@ -14,7 +14,7 @@ function [N] = getX_Neighbors(i, w, h)
     N = [];
     if x + 1 < w, N=[N; x+1, y]; end
     if x - 1 > 0, N=[N; x-1, y]; end    
-    N = sub2ind([w,h], N(2,:), N(1,:));
+    N = sub2ind([w,h], N(:, 2), N(:, 1));
 end
 % get neighbors in y-direction
 function [N] = getY_Neighbors(i, w, h)
@@ -22,6 +22,6 @@ function [N] = getY_Neighbors(i, w, h)
     N = [];
     if y + 1 < h, N=[N; x, y+1]; end
     if y - 1 > 0, N=[N; x, y-1]; end    
-    N = sub2ind([w,h], N(2,:), N(1,:));
+    N = sub2ind([w,h], N(:, 2), N(:, 1));
 end
 

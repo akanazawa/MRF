@@ -1,7 +1,7 @@
-function [U] = unary(sites, labels)
+function [U] = unary(site, label)
 %%%%%%%%%%%%%%%%%%%%
 % unary.m
-% for all sites, compute the unary potential given the label
+% for given sites, compute the unary potential of the given labels
 %
 % A foreground (l=1) site comes from a mixture of 2 gaussians
 % N(30,30), N(225,30)
@@ -19,34 +19,25 @@ function [U] = unary(sites, labels)
 % Angjoo Kanazawa 5/1/'12
 %%%%%%%%%%%%%%%%%%%%
 sig = 30;
-mu_b = 128, mu_f1 = 30, mu_f2 = 225;
+mu_b = 128; mu_f1 = 30; mu_f2 = 225;
 
-const = 1/2*log(2*pi*sig);
-alpha_b = @(x)(x - mu_b)^2./2(sig)^2 + const;
-alpha_f = @(x)-log(exp(-(x - mu_f1).^2./2(sig)^2 + exp(-(x - mu_f2).^2./2(sig)^2))...
-              + const - log(2);
-ind_f = find(label==1);
-ind_b = find(label==0);
-U = alpha_b(sites(ind_f)) + alpha_f(sites(ind_f));
+const = 1/2*log(2*pi) + log(sig);
+alpha_b = @(x) (x - mu_b).^2./(2*sig^2) + const;
+alpha_f = @(x)-log(exp(-(x - mu_f1).^2./(2*sig^2)) + ...
+                   exp(-(x - mu_f2).^2./(2*sig^2)) + eps) + ...
+                   const + log(2);
+% gam1 = @(x)exp(-(x-mu_f1).^2./(2*sig^2))*(sqrt(2*pi)*sig)^(-1);
+% gam2 = @(x)exp(-(x-mu_f2).^2./(2*sig^2))*(sqrt(2*pi)*sig)^(-1);
+% alpha_f = @(x) gam1(x).*(x - mu_f1).^2./(2*sig^2) + ...
+%           gam2(x).*(x - mu_f2).^2./(2*sig^2) + ...
+%           const + log(2);
 
+% ind_f = find(labels==1);
+% ind_b = find(labels==0);
+% U = sum(alpha_b(sites(ind_b))) + sum(alpha_f(sites(ind_f)));
+if label == 1
+    U = alpha_f(site.x);
+else
+    U = alpha_b(site.x);
 end
 
-function [U, labels] = mapUnary(sites)
-%%%%%%%%%%%%%%%%%%%%
-%MAP estimate with unary only
-%%%%%%%%%%%%%%%%%%%%
-sig = 30;
-mu_b = 128, mu_f1 = 30, mu_f2 = 225;
-
-const = 1/2*log(2*pi*sig);
-alpha_b = (sites - mu_b)^2./2(sig)^2 + const;
-% gam = exp(-(sites-mu_f1).^2./2(sig)^2)./sqrt(2*pi)*sig;
-% alpha_f = gam*(sites - mu_f1).^2./2(sig)^2 + (1-gam)*(sites - mu_f2).^2./2(sig)^2;
-alpha_f = -log(exp(-(sites - mu_f1).^2./2(sig)^2 + exp(-(sites - mu_f2).^2./2(sig)^2))...
-              + const - log(2);
-
-[maxLikelihood argmax] = min[alpha_b; alpha_f];
-labels = argmax - 1;
-U = sum(maxLikelihood);
-
-end

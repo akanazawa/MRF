@@ -1,16 +1,26 @@
-function [U] = pairwise(labels, K, I)
+function [U] = pairwise(site, labels, K, CRF)
 %%%%%%%%%%%%%%%%%%%%
 % pairwise.m
 % for all labels, compute the pairwise potential 
 % B_ij = K if l_i ~= l_j
 %        0 else
 %
+% If crf is set, 4*K*(M - d/dx(i,j))./M, where M is
+% the max derivative in each direction.
 % 
 % Angjoo Kanazawa 5/1/'12
 %%%%%%%%%%%%%%%%%%%%
-[w h] = size(I);
-U = 0;
-for i = 1:numel(sites)
-    N = getNeighbors(i, w, h);
-    U = U + K*numel(find(labels(N) ~= labels(x)));
+    Nx = site.xNeighbors; 
+    Ny = site.yNeighbors;
+    if ~isstruct(CRF)
+        U = K*numel(find(labels([Nx, Ny]) ~= labels(site.ind)));
+    else
+        indx = find(labels(Nx) ~= labels(site.ind));
+        indy = find(labels(Ny) ~= labels(site.ind));
+        U = 0;
+        if ~isempty(indx); U = 4*K*(CRF.Mx - CRF.Ix(indx))./CRF.Mx; end;
+        if ~isempty(indy); U = U + 4*K*(CRF.My - CRF.Iy(indy))./CRF.My; end;
+        U = sum(U);
+    end
+    
 end
