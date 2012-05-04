@@ -9,19 +9,19 @@ function sites = initSites(I)
 %%%%%%%%%%%%%%%%%%%%
 
 sites = cell(numel(I), 1);
-[w, h] = size(I);
+[r, c] = size(I);
 for i = 1: numel(I)
     sites{i}.x = I(i);
-    sites{i}.neighbors = getNeighbors(i, [w,h]);
+    sites{i}.neighbors = getNeighbors(i, r, c);
 end
 end
 
-function [N] = getNeighbors(i, size)
+function [N] = getNeighbors(i, r, c)
     N = [];
-    [x y] = ind2sub(size, i);
-    if x + 1 < size(1), N=[N; x+1, y]; end
-    if x - 1 > 0, N=[N; x-1, y]; end    
-    if y + 1 < size(2), N=[N; x, y+1]; end
-    if y - 1 > 0, N=[N; x, y-1]; end    
-    N = sub2ind(size, N(:, 2), N(:, 1));
+    [ir ic] = ind2sub([r, c], i);
+    if ir + 1 < r, N=[N; ir+1, ic]; end
+    if ir - 1 > 0, N=[N; ir-1, ic]; end    
+    if ic + 1 < ic, N=[N; ir, ic+1]; end
+    if ic - 1 > 0, N=[N; ir, ic-1]; end    
+    N = sub2ind([r, c], N(:, 1), N(:, 2));
 end

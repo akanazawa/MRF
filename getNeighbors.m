@@ -1,27 +1,25 @@
-function [N] = getNeighbors(i, w, h)
+function [N] = getNeighbors(i, r, c)
 %%%%%%%%%%%%%%%%%%%%
-% getNeighbors.m
-% For a given site i=(x,y), get the four neighbors
-%
-% Angjoo Kanazawa 5/1/'12
+% getNeigcbors.m
+% For a given site i=(x,y), get the four neigcbors
 %%%%%%%%%%%%%%%%%%%%
-    N = [getX_Neighbors(i,w,h); getY_Neighbors(i,w,h)];
+    N = [getX_Neighbors(i,r,c); getY_Neighbors(i,r,c)];
 end
 
-% get neighbors in x-direction
-function [N] = getX_Neighbors(i, w, h)
-    [x y] = ind2sub([w,h], i);
+% get neigcbors in x-direction
+function [N] = getX_Neighbors(i, r, c)
+    [ir ic] = ind2sub([r,c], i);
     N = [];
-    if x + 1 < w, N=[N; x+1, y]; end
-    if x - 1 > 0, N=[N; x-1, y]; end    
-    N = sub2ind([w,h], N(:, 2), N(:, 1));
+    if ir + 1 < r, N=[N; ir+1, ic]; end
+    if ir - 1 > 0, N=[N; ir-1, ic]; end    
+    N = sub2ind([r,c], N(:, 1), N(:, 2));
 end
-% get neighbors in y-direction
-function [N] = getY_Neighbors(i, w, h)
-    [x y] = ind2sub([w,h], i);
+% get neigcbors in y-direction
+function [N] = getY_Neighbors(i, r, c)
+    [ir ic] = ind2sub([r,c], i);
     N = [];
-    if y + 1 < h, N=[N; x, y+1]; end
-    if y - 1 > 0, N=[N; x, y-1]; end    
-    N = sub2ind([w,h], N(:, 2), N(:, 1));
+    if ic + 1 < c, N=[N; ir, ic+1]; end
+    if ic - 1 > 0, N=[N; ir, ic-1]; end    
+    N = sub2ind([r,c], N(:, 1), N(:, 2));
 end
 
