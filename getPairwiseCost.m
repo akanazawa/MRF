@@ -1,7 +1,7 @@
 %% construct N by N matrix holding binary cost with/without CRF
 function [weight] = getPairwiseCost(I, size, K, CRF)
     N = numel(I);
-    weight = zeros(N, N);
+    weight = sparse(N, N);
     if ~isstruct(CRF)
         for i=1:N
             neigh= getNeighbors(i, size);
@@ -22,25 +22,24 @@ function [N, Nx, Ny] = getNeighbors(i, size)
 % getNeighbors.m
 % For a given site i=(x,y), get the four neighbors
 %%%%%%%%%%%%%%%%%%%%
-    Nx = getX_Neighbors(i, size);            
-    Ny = getY_Neighbors(i, size);                
+    r= size(1); c = size(2);
+    Nx = getX_Neighbors(i, r,c);            
+    Ny = getY_Neighbors(i, r,c);                
     N = [Nx; Ny];
 end
-
-% get neighbors in x-direction
-function [N] = getX_Neighbors(i, size)
-    [x y] = ind2sub(size, i);
+% get neigcbors in y-direction
+function [N] = getY_Neighbors(i, r, c)
+    [ir ic] = ind2sub([r,c], i);
     N = [];
-    if x + 1 < size(1), N=[N; x+1, y]; end
-    if x - 1 > 0, N=[N; x-1, y]; end    
-    N = sub2ind(size, N(:, 2), N(:, 1));
+    if ir + 1 < r, N=[N; ir+1, ic]; end
+    if ir - 1 > 0, N=[N; ir-1, ic]; end    
+    N = sub2ind([r,c], N(:, 1), N(:, 2));
 end
-% get neighbors in y-direction
-function [N] = getY_Neighbors(i, size)
-    [x y] = ind2sub(size, i);
+% get neigcbors in x-direction
+function [N] = getX_Neighbors(i, r, c)
+    [ir ic] = ind2sub([r,c], i);
     N = [];
-    if y + 1 < size(2), N=[N; x, y+1]; end
-    if y - 1 > 0, N=[N; x, y-1]; end    
-    N = sub2ind(size, N(:, 2), N(:, 1));
+    if ic + 1 < c, N=[N; ir, ic+1]; end
+    if ic - 1 > 0, N=[N; ir, ic-1]; end    
+    N = sub2ind([r,c], N(:, 1), N(:, 2));
 end
-

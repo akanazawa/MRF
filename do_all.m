@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%
 addpath(genpath('utils'));
 %I = double(imread('TestImage.jpg'));
-I = double(imread('sil.jpg'));
+I = double(imread('cat.jpg'));
 sites = initSites(I);
 %%%%%%%%%%
 % parameters
