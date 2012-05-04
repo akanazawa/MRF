@@ -34,7 +34,6 @@ CRF.Mx = max(max(abs(Ix)));
 CRF.My = max(max(abs(Iy)));
 
 crfCosts = getPairwiseCost(I, size(I), K, CRF);
-[Ucrf, crfLabels] = icm(sites, initLabels, I, K, beta, CRF);
 [Ucrf2, crfLabels2] = icm2(unaryCosts, crfCosts, initLabels);
 
 %% 4. CRF with graph cut algorithm 

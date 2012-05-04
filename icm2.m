@@ -7,19 +7,18 @@ function [U, labels] = icm2(unary, pairwise, labels)
 %
 % Angjoo Kanzawa 4/30/'12
 %%%%%%%%%%%%%%%%%%%%
-    N = size(pairwise, 1);
     % U = getAllEnergy(unary, pairwise, labels);
+    N = size(pairwise, 1);
     fprintf('starting ICM\n');
-    numUnchanged = 0;
-    while numUnchanged ~= N %diff > 1e-13
-        numUnchanged = 0;
+    numChanged = Inf;
+    tic;
+    while numChanged ~= 0 %diff > 1e-13
+        numChanged = 0;
         for i = 1:N
-            u0 = getEnergy(unary, pairwise, i, labels);
-            labels(i) = ~labels(i); %swap
-            u1 = getEnergy(unary, pairwise, i, labels);
-            if u0 < u1 % no improvement
-                labels(i)= ~labels(i); % undo assignment
-                numUnchanged = numUnchanged + 1;
+            [u0 u1] = getEnergy(unary, pairwise, i, labels);
+            if u1 < u0 % no improvement
+                labels(i)= ~labels(i); % swap
+                numChanged = numChanged + 1;
             end
         end
         % UNew = getAllEnergy(unary, pairwise, labels);
@@ -27,12 +26,18 @@ function [U, labels] = icm2(unary, pairwise, labels)
         % fprintf('\tUold: %g Unew: %g diff: %g\n', U, UNew, diff);
         % U = UNew;
     end
-    U = getAllEnergy(unary, pairwise, labels);
+    toc;
+    U = getAllEnergy(unary, pairwise, labels);       
 end
 
-% get single and pairwise potential for single site
-function U = getEnergy(unary, pairwise, ind, labels)
+% get single and pairwise potential for single site as u0
+% and u1 as the potential for that site with label switched
+function [u0 u1] = getEnergy(unary, pairwise, ind, labels)
     neigh = find(pairwise(ind, :));
     notSame = find(labels(neigh)~= labels(ind));
-    U = unary(labels(ind)+1, ind) + sum(pairwise(ind, neigh(notSame)));
+    notSameChanged = find(labels(neigh)== labels(ind));
+    u0 = unary(labels(ind)+1, ind) + ...
+         sum(pairwise(ind, neigh(notSame)));
+    u1 = unary(~labels(ind)+1, ind) + ...
+         sum(pairwise(ind, neigh(notSameChanged)));
 end

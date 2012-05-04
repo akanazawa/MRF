@@ -10,29 +10,36 @@ function [U, labels] = sim_annealing2(unary, pairwise, labels)
     % U = getAllEnergy(unary, pairwise, labels);
     fprintf('starting simulated annealing\n');
     for T = temp
+        inds = randi(N, numItr, 1);
+        tic
         for i = 1:numItr
-            index = randi(N, 1);
-            labelprime = labels;
-            labelprime(index) = ~labels(index);
-            pf = getProb(unary, pairwise, index, labels, T);
-            pfprime = getProb(unary, pairwise, index, labelprime, T);
+            index = inds(i);
+            [pf pfprime] = getProb(unary, pairwise, index, labels, T);
             if rand(1,1) < pfprime/pf
                 labels(index) = ~labels(index);
             end
         end
+        toc;
+        keyboard
         % U2 = getAllEnergy(unary, pairwise, labels);
         % fprintf('\tat T=%d Uold: %g Unew: %g diff: %g\n', ...
         %         T, U, U2, abs(U-U2));
         % U = U2;
     end    
-    U = getAllEnergy(unary, pairwise, labels);
+    %    U = getAllEnergy(unary, pairwise, labels);
 end
 
-% get p(f_i), the probability of labeling site i with f_i
-function p = getProb(unary, pairwise, ind, labels, T)
+% get p(f_i), the probability of labeling site i with f_i and
+% p(f_i') that of switched label
+function [p, pprime] = getProb(unary, pairwise, ind, labels, T)
     neigh = find(pairwise(ind, :));
     notSame = find(labels(neigh)~= labels(ind));
-    U = unary(labels(ind)+1, ind) + sum(pairwise(ind, neigh(notSame)));
-    p = exp(-U/T);
+    notSameChanged = find(labels(neigh) == labels(ind));
+    u0 = unary(labels(ind)+1, ind) + ...
+         sum(pairwise(ind, neigh(notSame)));
+    u1 = unary(~labels(ind)+1, ind) + ...
+         sum(pairwise(ind, neigh(notSameChanged)));
+    p = exp(-u0/T);
+    pprime = exp(-u1/T);    
 end
 
