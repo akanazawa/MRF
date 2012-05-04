@@ -17,14 +17,13 @@ beta = 1;
 %% 1. Data term only
 %% Compute costs
 [unaryCosts, U, initLabels] = getUnaryCost(I(:)); % N by 2
-pairwiseCosts = getPairwiseCost(I, size(I), K, []);
+pairwiseCosts = getPairwiseCost(I, size(I), K, []); % N by N
 %% 2. with Pairwise term and ICM
 [Uicm, icmLabels] = icm2(unaryCosts, pairwiseCosts, initLabels);
+
 %% 3. with Simulated Annealing
 %[Usa, saLabels] = sim_annealing(sites, initLabels, K, beta, []);
-
 [Usa2, saLabels2] = sim_annealing2(unaryCosts, pairwiseCosts, initLabels);
-keyboard
 %% 4. CRF
 sigma = 1.5;
 I2 = gaussfilt(I, sigma);
@@ -36,10 +35,10 @@ CRF.My = max(max(abs(Iy)));
 
 crfCosts = getPairwiseCost(I, size(I), K, CRF);
 [Ucrf, crfLabels] = icm(sites, initLabels, I, K, beta, CRF);
-[Ucrf2, crfLabels] = icm2(unaryCosts, crfCosts, initLabels);
+[Ucrf2, crfLabels2] = icm2(unaryCosts, crfCosts, initLabels);
 
 %% 4. CRF with graph cut algorithm 
-gcLabels = graphcut(sites, I(:), CRF);
+[Ugc, gcLabels] = graphcut(sites, I(:), CRF);
 
 % beta term in http://yuwing.kaist.ac.kr/courses/cs770/reading/grabcut.pdf
 % CRF.meanDiffSq = 1./(mean(sum(bsxfun(@minus, I(:), I(:)').^2, 2)));

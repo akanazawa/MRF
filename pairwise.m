@@ -19,8 +19,8 @@ function [U] = pairwise(site, labels, K, CRF)
         indx = find(labels(Nx) ~= labels(site.ind));
         indy = find(labels(Ny) ~= labels(site.ind));
         U = 0;
-        if ~isempty(indx); U = 4*K*(CRF.Mx - CRF.Ix(indx))./CRF.Mx; end;
-        if ~isempty(indy); U = U + 4*K*(CRF.My - CRF.Iy(indy))./CRF.My; end;
+        if ~isempty(indx); U = 4*K*(CRF.Mx - CRF.Ix(Nx(indx)))./CRF.Mx; end;
+        if ~isempty(indy); U = U + 4*K*(CRF.My - CRF.Iy(Ny(indy)))./CRF.My; end;
         U = sum(U);
     end
     

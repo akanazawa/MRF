@@ -1,4 +1,4 @@
-function labels = graphcut(sites, I, CRF)
+function [E, labels] = graphcut(sites, I, CRF)
 %%%%%%%%%%%%%%%%%%%%
 % MAP estimate of the CRF cost using the graph-cut algorithm from:
 % Multi-label optimization http://vision.csd.uwo.ca/code/ 
