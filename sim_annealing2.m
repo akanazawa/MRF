@@ -1,4 +1,4 @@
-function [U, labels] = sim_annealing2(unary, pairwise, labels, sites)
+function [U, labels] = sim_annealing2(unary, pairwise, labels, neighbors)
 %%%%%%%%%%%%%%%%%%%%
 % sim_annealing.m
 % Minimize the energy by simulated annealing
@@ -13,7 +13,7 @@ function [U, labels] = sim_annealing2(unary, pairwise, labels, sites)
         inds = randi(N, numItr, 1);
         for i = 1:numItr
             index = inds(i);
-            [pf pfprime] = getProb(unary, pairwise, index, labels, sites,T);
+            [pf pfprime] = getProb(unary, pairwise, index, labels, neighbors,T);
             if rand(1,1) < pfprime/pf
                 labels(index) = ~labels(index);
             end
@@ -23,13 +23,13 @@ function [U, labels] = sim_annealing2(unary, pairwise, labels, sites)
         %         T, U, U2, abs(U-U2));
         % U = U2;
     end    
-    U = getAllEnergy(unary, pairwise, labels);
+    U = getAllEnergy(unary, pairwise, labels, neighbors);
 end
 
 % get p(f_i), the probability of labeling site i with f_i and
 % p(f_i') that of switched label
-function [p, pprime] = getProb(unary, pairwise, ind, labels, sites,T)
-    neigh = sites{ind}.neighbors; % find(pairwise(ind, :)) takes a while
+function [p, pprime] = getProb(unary, pairwise, ind, labels, neighbors,T)
+    neigh = neighbors{ind};
     notSame = find(labels(neigh)~= labels(ind));
     notSameChanged = find(labels(neigh) == labels(ind));
     u0 = unary(labels(ind)+1, ind) + ...

@@ -1,15 +1,16 @@
 %% construct N by N matrix holding binary cost with/without CRF
-function [weight] = getPairwiseCost(I, size, K, CRF)
+function [weight] = getPairwiseCost(I, neighbors, CRF)
+    [r c] = size(I);
     N = numel(I);
-    weight = zeros(N, N);
-    if ~isstruct(CRF)
+    weight = sparse(N, N);
+    if ~CRF.isCRF
         for i=1:N
-            neigh= getNeighbors(i, size);
-            weight(i, neigh) = K;
+            N = neighbors{i};
+            weight(i, N) = CRF.K;
         end
     else
         for i = 1:N
-            [~, Nx, Ny] = getNeighbors(i, size);
+            [Nx, Ny] = getXYNeighbors(i, r, c);
             weight(i, Nx) = 4*CRF.K*(CRF.Mx - CRF.Ix(Nx))./CRF.Mx;
             weight(i, Ny) = 4*CRF.K*(CRF.My - CRF.Iy(Ny))./CRF.My;
             % weight(i, Nx) = exp(-CRF.meanDiffSq*(I(Nx)-I(i)).^2)';
@@ -17,30 +18,11 @@ function [weight] = getPairwiseCost(I, size, K, CRF)
         end
     end
 end
-function [N, Nx, Ny] = getNeighbors(i, size)
-%%%%%%%%%%%%%%%%%%%%
-% getNeighbors.m
-% For a given site i=(x,y), get the four neighbors
-%%%%%%%%%%%%%%%%%%%%
-    Nx = getX_Neighbors(i, size);            
-    Ny = getY_Neighbors(i, size);                
-    N = [Nx; Ny];
+function [Nx, Ny] = getXYNeighbors(i, r, c)
+    [ir ic] = ind2sub([r, c], i);
+    Nx = []; Ny = [];
+    if ir < r, Nx=[Nx; i+1]; end
+    if ir > 1, Nx=[Nx; i-1]; end  
+    if ic < c, Ny=[Ny; i+r]; end
+    if ic > 1, Ny=[Ny; i-r]; end    
 end
-
-% get neighbors in x-direction
-function [N] = getX_Neighbors(i, size)
-    [x y] = ind2sub(size, i);
-    N = [];
-    if x + 1 < size(1), N=[N; x+1, y]; end
-    if x - 1 > 0, N=[N; x-1, y]; end    
-    N = sub2ind(size, N(:, 2), N(:, 1));
-end
-% get neighbors in y-direction
-function [N] = getY_Neighbors(i, size)
-    [x y] = ind2sub(size, i);
-    N = [];
-    if y + 1 < size(2), N=[N; x, y+1]; end
-    if y - 1 > 0, N=[N; x, y-1]; end    
-    N = sub2ind(size, N(:, 2), N(:, 1));
-end
-
