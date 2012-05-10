@@ -11,10 +11,8 @@ function [weight] = getPairwiseCost(I, neighbors, CRF)
     else
         for i = 1:N
             [Nx, Ny] = getXYNeighbors(i, r, c);
-            weight(i, Nx) = 4*CRF.K*(CRF.Mx - CRF.Ix(Nx))./CRF.Mx;
-            weight(i, Ny) = 4*CRF.K*(CRF.My - CRF.Iy(Ny))./CRF.My;
-            % weight(i, Nx) = exp(-CRF.meanDiffSq*(I(Nx)-I(i)).^2)';
-            % weight(i, Ny) = exp(-CRF.meanDiffSq*(I(Ny)-I(i)).^2)';
+            weight(i, Nx) = 4*CRF.K*(1 - CRF.Ix2(Nx));            
+            weight(i, Ny) = 4*CRF.K*(1 - CRF.Iy2(Ny));
         end
     end
 end

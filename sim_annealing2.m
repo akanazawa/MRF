@@ -30,12 +30,15 @@ end
 % p(f_i') that of switched label
 function [p, pprime] = getProb(unary, pairwise, ind, labels, neighbors,T)
     neigh = neighbors{ind};
-    notSame = find(labels(neigh)~= labels(ind));
-    notSameChanged = find(labels(neigh) == labels(ind));
-    u0 = unary(labels(ind)+1, ind) + ...
-         sum(pairwise(ind, neigh(notSame)));
-    u1 = unary(~labels(ind)+1, ind) + ...
-         sum(pairwise(ind, neigh(notSameChanged)));
+    u0 = unary(labels(ind)+1, ind); 
+    u1=unary(~labels(ind)+1, ind); % if label switched
+    for i = 1:numel(neigh)
+        if labels(neigh(i)) ~= labels(ind) % labels not same
+            u0 =  u0 + pairwise(ind, neigh(i));
+        else % what it would be if the label of ind changed
+            u1 = u1 + pairwise(ind, neigh(i));
+        end
+    end     
     p = exp(-u0/T);
     pprime = exp(-u1/T);    
 end

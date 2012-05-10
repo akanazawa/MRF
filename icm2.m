@@ -32,10 +32,20 @@ end
 % and u1 as the potential for that site with label switched
 function [u0 u1] = getEnergy(unary, pairwise, ind, labels, neighbors)
     neigh = neighbors{ind};
-    notSame = find(labels(neigh)~= labels(ind));
-    notSameChanged = find(labels(neigh)== labels(ind));
-    u0 = unary(labels(ind)+1, ind) + ...
-         sum(pairwise(ind, neigh(notSame)));
-    u1 = unary(~labels(ind)+1, ind) + ...
-         sum(pairwise(ind, neigh(notSameChanged)));
+    u0 = unary(labels(ind)+1, ind); 
+    u1= unary(~labels(ind)+1, ind); % if label switched
+    for i = 1:numel(neigh)
+        if labels(neigh(i)) ~= labels(ind) % labels not same
+            u0 =  u0 + pairwise(ind, neigh(i));
+        else % what it would be if the label of ind changed
+            u1 = u1 + pairwise(ind, neigh(i));
+        end
+    end 
+
+    % notSame = find(labels(neigh)~= labels(ind));
+    % notSameChanged = find(labels(neigh)== labels(ind));
+    % u0 = unary(labels(ind)+1, ind) + ...
+    %      sum(pairwise(ind, neigh(notSame)));
+    % u1 = unary(~labels(ind)+1, ind) + ...
+    %      sum(pairwise(ind, neigh(notSameChanged)));
 end
