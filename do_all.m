@@ -6,9 +6,9 @@
 %%%%%%%%%%%%%%%%%%%%
 addpath(genpath('utils'));
 %I = im2double(imread('TestImage.jpg'));
-%I = im2double(imread('cat.jpg'));
+I = im2double(imread('cat.jpg'));
 %I = im2double(imread('flower.jpg'));
-I = im2double(imread('aman.png'));
+% I = im2double(imread('aman.png'));
 if numel(size(I)) == 3, I = rgb2gray(I); end;
 neighbors = initNeighbors(I);
 %%%%%%%%%%
