@@ -1,4 +1,4 @@
-function [U, labels] = icm(sites, labels, I, K, beta, CRF)
+function [U, labels] = icm(unary, pairwise, labels, neighbors)
 %%%%%%%%%%%%%%%%%%%%
 % icm.m 
 % computes the map estimate via Iterated Conditional Modes
@@ -7,45 +7,45 @@ function [U, labels] = icm(sites, labels, I, K, beta, CRF)
 %
 % Angjoo Kanzawa 4/30/'12
 %%%%%%%%%%%%%%%%%%%%
-    [w, h] = size(I);
-    N = numel(sites);
-    % U = getAllEnergy(sites, labels, K, beta, CRF);
-    diff = Inf;
-    c = 0;
+    % U = getAllEnergy(unary, pairwise, labels);
+    N = size(pairwise, 1);
     fprintf('starting ICM\n');
-    numUnchanged = 0;
-    while  numUnchanged ~= N %diff > 1e-13
-        numUnchanged = 0;
-        for i = 1:numel(sites)
-            u0 = getEnergy(sites{i}, labels, K, beta, CRF);
-            labels(i) = ~labels(i); %swap
-            u1 = getEnergy(sites{i}, labels, K, beta, CRF);
-            if u0 < u1 % no improvement
-                labels(i)= ~labels(i); % undo assignment
-                numUnchanged = numUnchanged + 1;
+    numChanged = Inf;
+    while numChanged ~= 0 %diff > 1e-13
+        numChanged = 0;
+        for i = 1:N
+            [u0 u1] = getEnergy(unary, pairwise, i, labels, neighbors);
+            if u1 < u0 % no improvement
+                labels(i)= ~labels(i); % swap
+                numChanged = numChanged + 1;
             end
         end
-          % UNew = getAllEnergy(sites, labels, K, beta, CRF);
-          % diff = abs(UNew - U);
-          % fprintf('\titer %d Uold: %g Unew: %g diff: %g\n', c, U, UNew, diff);
-          % U = UNew;
-          % c = c+1;
+        % UNew = getAllEnergy(unary, pairwise, labels);
+        % diff = abs(UNew - U);
+        % fprintf('\tUold: %g Unew: %g diff: %g\n', U, UNew, diff);
+        % U = UNew;
     end
-    U = getAllEnergy(sites, labels, K, beta, CRF);
+    U = getAllEnergy(unary, pairwise, labels, neighbors);       
 end
 
-% get single and pairwise potential for single site
-function U = getEnergy(site, labels, K, beta, CRF)
-    U = unary(site, labels(site.ind)) + ...
-        beta.*pairwise(site, labels, K, CRF);
-end
+% get single and pairwise potential for single site as u0
+% and u1 as the potential for that site with label switched
+function [u0 u1] = getEnergy(unary, pairwise, ind, labels, neighbors)
+    neigh = neighbors{ind};
+    u0 = unary(labels(ind)+1, ind); 
+    u1= unary(~labels(ind)+1, ind); % if label switched
+    for i = 1:numel(neigh)
+        if labels(neigh(i)) ~= labels(ind) % labels not same
+            u0 =  u0 + pairwise(ind, neigh(i));
+        else % what it would be if the label of ind changed
+            u1 = u1 + pairwise(ind, neigh(i));
+        end
+    end 
 
-% get single and pairwise potential for all sites
-function U = getAllEnergy(sites, labels, K, beta, CRF)
-    U = 0;
-    for i = 1:numel(sites)
-        U = U + unary(sites{i}, labels(i)) + ...
-            beta.*pairwise(sites{i}, labels, K, CRF);
-    end
+    % notSame = find(labels(neigh)~= labels(ind));
+    % notSameChanged = find(labels(neigh)== labels(ind));
+    % u0 = unary(labels(ind)+1, ind) + ...
+    %      sum(pairwise(ind, neigh(notSame)));
+    % u1 = unary(~labels(ind)+1, ind) + ...
+    %      sum(pairwise(ind, neigh(notSameChanged)));
 end
-

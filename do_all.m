@@ -5,10 +5,10 @@
 % Angjoo Kanazawa 4/30/'12
 %%%%%%%%%%%%%%%%%%%%
 addpath(genpath('utils'));
-I = im2double(imread('TestImage.jpg'));
-% I = im2double(imread('cat.jpg'));
-% I = im2double(imread('flower.jpg'));
-% I = im2double(imread('aman.jpg'));
+%I = im2double(imread('TestImage.jpg'));
+%I = im2double(imread('cat.jpg'));
+%I = im2double(imread('flower.jpg'));
+I = im2double(imread('aman.png'));
 if numel(size(I)) == 3, I = rgb2gray(I); end;
 neighbors = initNeighbors(I);
 %%%%%%%%%%
@@ -16,14 +16,18 @@ neighbors = initNeighbors(I);
 %%%%%%%%%%
 K = .897; 
 uParams.sig = 30/255;
-% for test ima
-uParams.mu_b = 128/255; uParams.mu_f1 = 30/255; uParams.mu_f2 = 225/255;    
+% for test image
+%uParams.mu_b = 128; uParams.mu_f1 = 30; uParams.mu_f2 = 225;    
 % for cat
 %uParams.mu_b = 30; uParams.mu_f1 = 150; uParams.mu_f2 = 225;    
 % for flower
 %uParams.mu_b = 30; uParams.mu_f1 = 120; uParams.mu_f2 = 225;    
 % for man
-%uParams.mu_b = 200; uParams.mu_f1 = 30; uParams.mu_f2 = 120;    
+uParams.mu_b = 200; uParams.mu_f1 = 30; uParams.mu_f2 = 120;    
+% scale [0 1] for graphcuts
+uParams.mu_b = uParams.mu_b/255; uParams.mu_f1 = uParams.mu_f1/255;
+uParams.mu_f2 =uParams.mu_f2/255;    
+
 %% 1. Data term only
 %% Compute costs
 [unaryCosts, U, initLabels] = getUnaryCost(I(:), uParams); % N by 2
@@ -31,10 +35,10 @@ CRF.isCRF = 0;
 CRF.K = K;
 pairwiseCosts = getPairwiseCost(I, neighbors, CRF); % N by N
 %% 2. with Pairwise term and ICM
-[Uicm, icmLabels] = icm2(unaryCosts, pairwiseCosts, initLabels, neighbors);
+[Uicm, icmLabels] = icm(unaryCosts, pairwiseCosts, initLabels, neighbors);
 
 %% 3. with Simulated Annealing
-[Usa, saLabels] = sim_annealing2(unaryCosts, pairwiseCosts, ...
+[Usa, saLabels] = sim_annealing(unaryCosts, pairwiseCosts, ...
                                    initLabels, neighbors);
 %% 4. CRF
 sigma = 1.5;
@@ -47,14 +51,10 @@ CRF.Ix = Ix; CRF.Iy = Iy;
 CRF.Ix2 = Ix./CRF.Mx; CRF.Iy2 = Iy./CRF.My;
 
 crfCosts = getPairwiseCost(I, neighbors, CRF);
-[Ucrf, crfLabels] = icm2(unaryCosts, crfCosts, saLabels, neighbors);
+[Ucrf, crfLabels] = icm(unaryCosts, crfCosts, saLabels, neighbors);
 
 %% 4. CRF with graph cut algorithm 
 [Ugc_a, gcLabels_a, Ugc_ab, gcLabels_ab] = graphcut(unaryCosts, crfCosts);
-
-% beta term in http://yuwing.kaist.ac.kr/courses/cs770/reading/grabcut.pdf
-% CRF.meanDiffSq = 1./(mean(sum(bsxfun(@minus, I(:), I(:)').^2, 2)));
-% gcLabels2 = graphcut(sites, I(:), CRF);
 
 %%% Plot
 U0 = getAllEnergy(unaryCosts, pairwiseCosts, initLabels, neighbors);
